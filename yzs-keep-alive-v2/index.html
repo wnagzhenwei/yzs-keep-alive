@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>yzs-keep-alive-v2 Development</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    h1 {
+      color: #42b983;
+    }
+    .demo-section {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .tab-buttons {
+      margin-bottom: 20px;
+    }
+    .tab-buttons button {
+      margin-right: 10px;
+      padding: 10px 20px;
+      cursor: pointer;
+      border: 2px solid #42b983;
+      background-color: white;
+      border-radius: 4px;
+      transition: all 0.3s;
+    }
+    .tab-buttons button:hover {
+      background-color: #42b983;
+      color: white;
+    }
+    .tab-buttons button.active {
+      background-color: #42b983;
+      color: white;
+    }
+    .component-box {
+      border: 2px solid #e0e0e0;
+      padding: 20px;
+      margin: 10px 0;
+      border-radius: 8px;
+      min-height: 150px;
+    }
+    .component-a { background-color: #e3f2fd; border-color: #2196f3; }
+    .component-b { background-color: #fce4ec; border-color: #e91e63; }
+    .component-c { background-color: #f3e5f5; border-color: #9c27b0; }
+    .info {
+      margin: 10px 0;
+      padding: 12px;
+      background-color: #f9f9f9;
+      border-radius: 4px;
+      border-left: 4px solid #42b983;
+    }
+    .cache-info {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #fff9e6;
+      border: 2px solid #ffd700;
+      border-radius: 8px;
+    }
+    .controls {
+      margin-top: 20px;
+    }
+    .controls button {
+      margin-right: 10px;
+      padding: 8px 16px;
+      cursor: pointer;
+      border: 2px solid #666;
+      background-color: white;
+      border-radius: 4px;
+    }
+    .controls button:hover {
+      background-color: #666;
+      color: white;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 8px;
+    }
+    .badge.cached {
+      background-color: #4caf50;
+      color: white;
+    }
+    .badge.not-cached {
+      background-color: #f44336;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>yzs-keep-alive-v2 Demo</h1>
+    <p>A custom KeepAlive component for Vue 2</p>
+
+    <div class="demo-section">
+      <h2>Basic Demo</h2>
+      <p>Click the tabs below to switch between components. Components A and B will be cached, but Component C will not.</p>
+
+      <div class="tab-buttons">
+        <button
+          v-for="tab in tabs"
+          :key="tab.name"
+          :class="{ active: currentTab === tab.name }"
+          @click="switchTab(tab.name)">
+          {{ tab.label }}
+        </button>
+      </div>
+
+      <!-- YzsKeepAlive with include pattern -->
+      <yzs-keep-alive
+        ref="keepAlive"
+        :include="['ComponentA', 'ComponentB']"
+        :max="3">
+        <component :is="currentTab"></component>
+      </yzs-keep-alive>
+    </div>
+
+    <div class="demo-section">
+      <div class="cache-info">
+        <h3>Cache Status</h3>
+        <p><strong>Cached Components:</strong> {{ cachedKeys.length > 0 ? cachedKeys.join(', ') : 'None' }}</p>
+        <p><strong>Cache Size:</strong> {{ cacheSize }} / 3</p>
+        <p><strong>Current Tab:</strong> {{ currentTab }}</p>
+      </div>
+
+      <div class="controls">
+        <button @click="clearCache">Clear All Cache</button>
+        <button @click="showCacheInfo">Show Cache Details</button>
+        <button @click="refreshInfo">Refresh Info</button>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h3>How It Works</h3>
+      <ul>
+        <li><strong>Component A & B:</strong> Cached - state is preserved when switching</li>
+        <li><strong>Component C:</strong> Not cached - state resets each time</li>
+        <li><strong>max="3":</strong> Maximum 3 components can be cached</li>
+        <li><strong>include:</strong> Only cache ComponentA and ComponentB</li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
+  <script type="text/x-template" id="component-a-template">
+    <div class="component-box component-a">
+      <h2>Component A <span class="badge cached">Cached</span></h2>
+      <div class="info">
+        <p>This component is cached! Your counter value will be preserved.</p>
+        <p><strong>Activation count:</strong> {{ activationCount }}</p>
+        <p><strong>Counter value:</strong> {{ counter }}</p>
+        <p><strong>Last activated:</strong> {{ lastActivated || 'Never' }}</p>
+      </div>
+      <button @click="counter++">Increment Counter</button>
+      <button @click="counter = 0">Reset Counter</button>
+    </div>
+  </script>
+
+  <script type="text/x-template" id="component-b-template">
+    <div class="component-box component-b">
+      <h2>Component B <span class="badge cached">Cached</span></h2>
+      <div class="info">
+        <p>This component is cached! Your counter value will be preserved.</p>
+        <p><strong>Activation count:</strong> {{ activationCount }}</p>
+        <p><strong>Counter value:</strong> {{ counter }}</p>
+        <p><strong>Last activated:</strong> {{ lastActivated || 'Never' }}</p>
+      </div>
+      <button @click="counter++">Increment Counter</button>
+      <button @click="counter = 0">Reset Counter</button>
+    </div>
+  </script>
+
+  <script type="text/x-template" id="component-c-template">
+    <div class="component-box component-c">
+      <h2>Component C <span class="badge not-cached">Not Cached</span></h2>
+      <div class="info">
+        <p>This component is NOT cached! The counter will reset each time.</p>
+        <p><strong>Counter value:</strong> {{ counter }}</p>
+        <p><em>Note: Try incrementing the counter, then switch to another tab and come back. The counter will be reset!</em></p>
+      </div>
+      <button @click="counter++">Increment Counter</button>
+      <button @click="counter = 0">Reset Counter</button>
+    </div>
+  </script>
+
+  <script type="module">
+    // Import YzsKeepAlive using ES module syntax for Vite dev
+    import YzsKeepAlive from './src/components/YzsKeepAlive.vue'
+
+    const ComponentA = {
+      name: 'ComponentA',
+      template: '#component-a-template',
+      data() {
+        return {
+          counter: 0,
+          activationCount: 0,
+          lastActivated: null
+        }
+      },
+      activated() {
+        this.activationCount++
+        this.lastActivated = new Date().toLocaleTimeString()
+        console.log('[ComponentA] Activated at', this.lastActivated)
+      },
+      deactivated() {
+        console.log('[ComponentA] Deactivated')
+      }
+    }
+
+    const ComponentB = {
+      name: 'ComponentB',
+      template: '#component-b-template',
+      data() {
+        return {
+          counter: 0,
+          activationCount: 0,
+          lastActivated: null
+        }
+      },
+      activated() {
+        this.activationCount++
+        this.lastActivated = new Date().toLocaleTimeString()
+        console.log('[ComponentB] Activated at', this.lastActivated)
+      },
+      deactivated() {
+        console.log('[ComponentB] Deactivated')
+      }
+    }
+
+    const ComponentC = {
+      name: 'ComponentC',
+      template: '#component-c-template',
+      data() {
+        return {
+          counter: 0
+        }
+      },
+      activated() {
+        console.log('[ComponentC] Activated')
+      },
+      deactivated() {
+        console.log('[ComponentC] Deactivated')
+      }
+    }
+
+    // Register Vue component
+    Vue.component('yzs-keep-alive', YzsKeepAlive.default || YzsKeepAlive)
+
+    new Vue({
+      el: '#app',
+      components: {
+        ComponentA,
+        ComponentB,
+        ComponentC
+      },
+      data: {
+        currentTab: 'component-a',
+        tabs: [
+          { name: 'component-a', label: 'Component A' },
+          { name: 'component-b', label: 'Component B' },
+          { name: 'component-c', label: 'Component C' }
+        ],
+        cachedKeys: [],
+        cacheSize: 0
+      },
+      methods: {
+        switchTab(tabName) {
+          this.currentTab = tabName
+          this.$nextTick(() => {
+            this.updateCacheInfo()
+          })
+        },
+        clearCache() {
+          if (this.$refs.keepAlive) {
+            this.$refs.keepAlive.clearCache()
+            this.updateCacheInfo()
+            console.log('Cache cleared')
+          }
+        },
+        showCacheInfo() {
+          if (this.$refs.keepAlive) {
+            const keys = this.$refs.keepAlive.getCachedKeys()
+            const size = this.$refs.keepAlive.getCacheSize()
+            console.log('Cache Info:', { keys, size })
+            alert(`Cached components: ${keys.join(', ') || 'None'}\nCache size: ${size}`)
+          }
+        },
+        refreshInfo() {
+          this.updateCacheInfo()
+        },
+        updateCacheInfo() {
+          if (this.$refs.keepAlive) {
+            this.cachedKeys = this.$refs.keepAlive.getCachedKeys()
+            this.cacheSize = this.$refs.keepAlive.getCacheSize()
+          }
+        }
+      },
+      mounted() {
+        console.log('App mounted')
+        this.updateCacheInfo()
+      }
+    })
+  </script>
+</body>
+</html>

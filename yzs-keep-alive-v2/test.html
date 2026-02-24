@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>yzs-keep-alive-v2 Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .tabs { margin: 20px 0; }
+    .tabs button {
+      padding: 10px 20px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    .tabs button.active {
+      background-color: #42b983;
+      color: white;
+    }
+    .component {
+      border: 2px solid #ddd;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    .info {
+      background-color: #f5f5f5;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    .cache-status {
+      background-color: #fff9e6;
+      padding: 15px;
+      margin: 20px 0;
+      border: 2px solid #ffd700;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>yzs-keep-alive-v2 Test</h1>
+
+    <div class="tabs">
+      <button :class="{ active: currentView === 'compA' }" @click="currentView = 'compA'">Component A</button>
+      <button :class="{ active: currentView === 'compB' }" @click="currentView = 'compB'">Component B</button>
+      <button :class="{ active: currentView === 'compC' }" @click="currentView = 'compC'">Component C (No Cache)</button>
+    </div>
+
+    <yzs-keep-alive ref="keepAlive" :include="['CompA', 'CompB']" :max="2">
+      <component :is="currentView"></component>
+    </yzs-keep-alive>
+
+    <div class="cache-status">
+      <h3>Cache Status</h3>
+      <p>Cached Keys: {{ cachedKeys.join(', ') || 'None' }}</p>
+      <p>Cache Size: {{ cacheSize }}</p>
+      <button @click="clearCache">Clear Cache</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
+  <script src="./dist/yzs-keep-alive-v2.umd.js"></script>
+  <script>
+    const CompA = {
+      name: 'CompA',
+      template: `
+        <div class="component">
+          <h2>Component A (Cached)</h2>
+          <div class="info">
+            <p>Counter: {{ counter }}</p>
+            <p>Activated: {{ activationCount }} times</p>
+            <p>Last activated: {{ lastActivated }}</p>
+          </div>
+          <button @click="counter++">Increment</button>
+          <button @click="counter = 0">Reset</button>
+        </div>
+      `,
+      data() {
+        return { counter: 0, activationCount: 0, lastActivated: '' }
+      },
+      activated() {
+        this.activationCount++
+        this.lastActivated = new Date().toLocaleTimeString()
+        console.log('[CompA] activated - count:', this.activationCount)
+      },
+      deactivated() {
+        console.log('[CompA] deactivated')
+      }
+    }
+
+    const CompB = {
+      name: 'CompB',
+      template: `
+        <div class="component">
+          <h2>Component B (Cached)</h2>
+          <div class="info">
+            <p>Counter: {{ counter }}</p>
+            <p>Activated: {{ activationCount }} times</p>
+            <p>Last activated: {{ lastActivated }}</p>
+          </div>
+          <button @click="counter++">Increment</button>
+          <button @click="counter = 0">Reset</button>
+        </div>
+      `,
+      data() {
+        return { counter: 0, activationCount: 0, lastActivated: '' }
+      },
+      activated() {
+        this.activationCount++
+        this.lastActivated = new Date().toLocaleTimeString()
+        console.log('[CompB] activated - count:', this.activationCount)
+      },
+      deactivated() {
+        console.log('[CompB] deactivated')
+      }
+    }
+
+    const CompC = {
+      name: 'CompC',
+      template: `
+        <div class="component">
+          <h2>Component C (Not Cached)</h2>
+          <div class="info">
+            <p>Counter: {{ counter }}</p>
+            <p><em>This component is not cached - counter will reset on each visit!</em></p>
+          </div>
+          <button @click="counter++">Increment</button>
+          <button @click="counter = 0">Reset</button>
+        </div>
+      `,
+      data() {
+        return { counter: 0 }
+      },
+      activated() {
+        console.log('[CompC] activated')
+      },
+      deactivated() {
+        console.log('[CompC] deactivated')
+      }
+    }
+
+    // Register components
+    Vue.component('yzs-keep-alive', YzsKeepAlive)
+
+    new Vue({
+      el: '#app',
+      components: { CompA, CompB, CompC },
+      data: {
+        currentView: 'compA',
+        cachedKeys: [],
+        cacheSize: 0
+      },
+      methods: {
+        clearCache() {
+          if (this.$refs.keepAlive) {
+            this.$refs.keepAlive.clearCache()
+            this.updateCacheInfo()
+          }
+        },
+        updateCacheInfo() {
+          if (this.$refs.keepAlive) {
+            this.cachedKeys = this.$refs.keepAlive.getCachedKeys()
+            this.cacheSize = this.$refs.keepAlive.getCacheSize()
+          }
+        }
+      },
+      mounted() {
+        console.log('App mounted')
+        this.updateCacheInfo()
+      },
+      watch: {
+        currentView() {
+          this.$nextTick(() => this.updateCacheInfo())
+        }
+      }
+    })
+  </script>
+</body>
+</html>

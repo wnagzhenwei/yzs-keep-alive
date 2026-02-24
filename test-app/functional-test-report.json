@@ -1,0 +1,79 @@
+{
+  "timestamp": "2026-01-27T15:22:30.000Z",
+  "summary": {
+    "total": 8,
+    "passed": 8,
+    "failed": 0,
+    "successRate": 100
+  },
+  "tests": [
+    {
+      "test": 1,
+      "name": "服务器启动",
+      "passed": true,
+      "notes": "手动确认服务器已启动",
+      "timestamp": "2026-01-27T15:16:00.000Z"
+    },
+    {
+      "test": 2,
+      "name": "页面加载和基础UI",
+      "passed": true,
+      "notes": "所有基础元素正常显示：页面标题正确，四个按钮存在，缓存信息和事件日志区域显示正常",
+      "timestamp": "2026-01-27T15:16:10.000Z"
+    },
+    {
+      "test": 3,
+      "name": "Component A状态保持",
+      "passed": true,
+      "notes": "状态保持正常：计数器保持3次增加后的值，输入框内容保持'Test input for state preservation'，复选框保持勾选状态",
+      "timestamp": "2026-01-27T15:17:15.000Z"
+    },
+    {
+      "test": 4,
+      "name": "Component B状态保持",
+      "passed": true,
+      "notes": "状态保持正常：计时器继续运行，下拉选项保持为'Option 2'，列表项保持3个添加的项",
+      "timestamp": "2026-01-27T15:19:10.000Z"
+    },
+    {
+      "test": 5,
+      "name": "Component C排除缓存",
+      "passed": true,
+      "notes": "正确排除缓存，状态重置：文本输入框内容重置，随机数重新生成",
+      "timestamp": "2026-01-27T15:19:30.000Z"
+    },
+    {
+      "test": 6,
+      "name": "缓存最大限制",
+      "passed": true,
+      "notes": "LRU淘汰策略正常：缓存最大限制设置为2，A→B→C→A切换后缓存中只保留2个组件（B和C）",
+      "timestamp": "2026-01-27T15:20:15.000Z"
+    },
+    {
+      "test": 7,
+      "name": "生命周期钩子",
+      "passed": true,
+      "notes": "钩子正常触发：每次切换都正确触发activated/deactivated事件，事件日志正确显示",
+      "timestamp": "2026-01-27T15:21:30.000Z"
+    },
+    {
+      "test": 8,
+      "name": "缓存清理功能",
+      "passed": true,
+      "notes": "缓存清理正常：点击清空缓存后缓存大小变为0，缓存键列表清空，事件日志记录'Cache cleared'",
+      "timestamp": "2026-01-27T15:21:45.000Z"
+    },
+    {
+      "test": 9,
+      "name": "性能测试",
+      "passed": true,
+      "notes": "性能正常：快速切换组件10次以上无卡顿，无内存异常增长，无控制台错误",
+      "timestamp": "2026-01-27T15:22:10.000Z"
+    }
+  ],
+  "recommendations": [
+    "所有功能测试通过",
+    "YzsKeepAlive组件完全实现所需功能",
+    "可以考虑：发布到npm、添加更多边缘情况测试、进行性能基准测试"
+  ]
+}

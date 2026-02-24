@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>yzs-keep-alive-v2 测试应用</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    #app {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      opacity: 0.9;
+      font-size: 14px;
+    }
+
+    .tab-buttons {
+      display: flex;
+      background: #f5f5f5;
+      padding: 10px 10px 0;
+      gap: 5px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .tab-buttons button {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      color: #666;
+      border-radius: 8px 8px 0 0;
+      transition: all 0.3s ease;
+    }
+
+    .tab-buttons button:hover {
+      background: #e8e8e8;
+    }
+
+    .tab-buttons button.active {
+      background: white;
+      color: #667eea;
+      border-bottom: 2px solid white;
+      margin-bottom: -2px;
+    }
+
+    .tab-content {
+      padding: 30px;
+      min-height: 400px;
+    }
+
+    .component-box {
+      border-radius: 8px;
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+
+    .component-a {
+      background: linear-gradient(135deg, #667eea22 0%, #764ba222 100%);
+      border-left: 4px solid #667eea;
+    }
+
+    .component-b {
+      background: linear-gradient(135deg, #f093fb22 0%, #f5576c22 100%);
+      border-left: 4px solid #f5576c;
+    }
+
+    .component-c {
+      background: linear-gradient(135deg, #4facfe22 0%, #00f2fe22 100%);
+      border-left: 4px solid #4facfe;
+    }
+
+    .component-box h2 {
+      font-size: 22px;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .info-box {
+      background: white;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 15px 0;
+      border: 1px solid #e0e0e0;
+    }
+
+    .info-box p {
+      margin: 8px 0;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .info-box strong {
+      color: #333;
+    }
+
+    .counter-display {
+      font-size: 48px;
+      font-weight: bold;
+      color: #667eea;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-danger {
+      background: #f5576c;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #f3455c;
+    }
+
+    .btn-info {
+      background: #4facfe;
+      color: white;
+    }
+
+    .btn-info:hover {
+      background: #3e9be6;
+    }
+
+    .cache-panel {
+      background: #fff9e6;
+      border: 1px solid #ffd700;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 30px;
+    }
+
+    .cache-panel h3 {
+      color: #f57c00;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .cache-panel p {
+      margin: 8px 0;
+      color: #666;
+    }
+
+    .cache-keys {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .cache-key {
+      background: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      color: #667eea;
+      border: 1px solid #e0e0e0;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-left: 10px;
+    }
+
+    .status-cached {
+      background: #4caf50;
+      color: white;
+    }
+
+    .status-not-cached {
+      background: #f5576c;
+      color: white;
+    }
+
+    .controls {
+      padding: 20px 30px;
+      background: #f9f9f9;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .log-panel {
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 15px;
+      margin: 20px 30px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    .log-entry {
+      padding: 4px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+
+    .log-time {
+      color: #999;
+      margin-right: 10px;
+    }
+
+    .log-activated {
+      color: #4caf50;
+    }
+
+    .log-deactivated {
+      color: #f5576c;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

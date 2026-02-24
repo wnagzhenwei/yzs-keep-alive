@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>yzs-keep-alive-v2 Example</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .tab-buttons {
+      margin-bottom: 20px;
+    }
+    .tab-buttons button {
+      margin-right: 10px;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+    .tab-buttons button.active {
+      background-color: #42b983;
+      color: white;
+    }
+    .component-box {
+      border: 1px solid #ddd;
+      padding: 20px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    .component-a {
+      background-color: #f0f9ff;
+    }
+    .component-b {
+      background-color: #fef3f0;
+    }
+    .component-c {
+      background-color: #f0fef4;
+    }
+    .info {
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+    }
+    .cache-info {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #fff9e6;
+      border: 1px solid #ffd700;
+      border-radius: 4px;
+    }
+    .controls {
+      margin-top: 20px;
+    }
+    .controls button {
+      margin-right: 10px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>yzs-keep-alive-v2 Example</h1>
+
+    <div class="tab-buttons">
+      <button
+        v-for="tab in tabs"
+        :key="tab.name"
+        :class="{ active: currentTab === tab.name }"
+        @click="currentTab = tab.name">
+        {{ tab.label }}
+      </button>
+    </div>
+
+    <!-- YzsKeepAlive component with include pattern -->
+    <yzs-keep-alive
+      ref="keepAlive"
+      :include="['ComponentA', 'ComponentB']"
+      :max="3">
+      <component :is="currentTab" @count-updated="handleCountUpdate"></component>
+    </yzs-keep-alive>
+
+    <div class="cache-info">
+      <h3>Cache Status:</h3>
+      <p>Cached Keys: {{ cachedKeys.join(', ') || 'None' }}</p>
+      <p>Cache Size: {{ cacheSize }} / 3</p>
+    </div>
+
+    <div class="controls">
+      <button @click="clearCache">Clear Cache</button>
+      <button @click="showCacheInfo">Show Cache Info</button>
+    </div>
+  </div>
+
+  <script type="text/x-template" id="component-a-template">
+    <div class="component-box component-a">
+      <h2>Component A (Cached)</h2>
+      <div class="info">
+        <p>This component will be cached because it matches the <code>include</code> pattern.</p>
+        <p><strong>Activation count:</strong> {{ activationCount }}</p>
+        <p><strong>Counter value:</strong> {{ counter }}</p>
+        <p><strong>Activated:</strong> {{ lastActivated }}</p>
+      </div>
+      <button @click="counter++">Increment Counter</button>
+    </div>
+  </script>
+
+  <script type="text/x-template" id="component-b-template">
+    <div class="component-box component-b">
+      <h2>Component B (Cached)</h2>
+      <div class="info">
+        <p>This component will be cached because it matches the <code>include</code> pattern.</p>
+        <p><strong>Activation count:</strong> {{ activationCount }}</p>
+        <p><strong>Counter value:</strong> {{ counter }}</p>
+        <p><strong>Activated:</strong> {{ lastActivated }}</p>
+      </div>
+      <button @click="counter++">Increment Counter</button>
+    </div>
+  </script>
+
+  <script type="text/x-template" id="component-c-template">
+    <div class="component-box component-c">
+      <h2>Component C (Not Cached)</h2>
+      <div class="info">
+        <p>This component will NOT be cached because it doesn't match the <code>include</code> pattern.</p>
+        <p><strong>Counter value:</strong> {{ counter }}</p>
+        <p><strong>Note:</strong> Counter will reset each time you visit this tab!</p>
+      </div>
+      <button @click="counter++">Increment Counter</button>
+    </div>
+  </script>
+
+  <script>
+    // Load yzs-keep-alive-v2 from build (you need to run `npm run build` first)
+    // For development, you can use the component directly
+
+    // Component A (cached)
+    const ComponentA = {
+      name: 'ComponentA',
+      template: '#component-a-template',
+      data() {
+        return {
+          counter: 0,
+          activationCount: 0,
+          lastActivated: null
+        }
+      },
+      activated() {
+        this.activationCount++
+        this.lastActivated = new Date().toLocaleTimeString()
+        console.log('ComponentA activated')
+      },
+      deactivated() {
+        console.log('ComponentA deactivated')
+      }
+    }
+
+    // Component B (cached)
+    const ComponentB = {
+      name: 'ComponentB',
+      template: '#component-b-template',
+      data() {
+        return {
+          counter: 0,
+          activationCount: 0,
+          lastActivated: null
+        }
+      },
+      activated() {
+        this.activationCount++
+        this.lastActivated = new Date().toLocaleTimeString()
+        console.log('ComponentB activated')
+      },
+      deactivated() {
+        console.log('ComponentB deactivated')
+      }
+    }
+
+    // Component C (not cached)
+    const ComponentC = {
+      name: 'ComponentC',
+      template: '#component-c-template',
+      data() {
+        return {
+          counter: 0
+        }
+      },
+      activated() {
+        console.log('ComponentC activated')
+      },
+      deactivated() {
+        console.log('ComponentC deactivated')
+      }
+    }
+
+    // After building, use this:
+    // const YzsKeepAlive = require('./dist/yzs-keep-alive-v2.umd.js').default
+
+    // For this example, we'll use a simple implementation
+    // Replace this with the actual import after building
+    new Vue({
+      el: '#app',
+      components: {
+        ComponentA,
+        ComponentB,
+        ComponentC
+      },
+      data: {
+        currentTab: 'component-a',
+        tabs: [
+          { name: 'component-a', label: 'Component A (Cached)' },
+          { name: 'component-b', label: 'Component B (Cached)' },
+          { name: 'component-c', label: 'Component C (Not Cached)' }
+        ],
+        cachedKeys: [],
+        cacheSize: 0
+      },
+      methods: {
+        clearCache() {
+          if (this.$refs.keepAlive) {
+            this.$refs.keepAlive.clearCache()
+            this.updateCacheInfo()
+            alert('Cache cleared!')
+          }
+        },
+        showCacheInfo() {
+          if (this.$refs.keepAlive) {
+            const keys = this.$refs.keepAlive.getCachedKeys()
+            const size = this.$refs.keepAlive.getCacheSize()
+            alert(`Cached components: ${keys.join(', ')}\nCache size: ${size}`)
+          }
+        },
+        updateCacheInfo() {
+          if (this.$refs.keepAlive) {
+            this.cachedKeys = this.$refs.keepAlive.getCachedKeys()
+            this.cacheSize = this.$refs.keepAlive.getCacheSize()
+          }
+        },
+        handleCountUpdate() {
+          this.updateCacheInfo()
+        }
+      },
+      watch: {
+        currentTab() {
+          // Update cache info after tab switch
+          this.$nextTick(() => {
+            this.updateCacheInfo()
+          })
+        }
+      },
+      mounted() {
+        console.log('App mounted')
+      }
+    })
+  </script>
+</body>
+</html>

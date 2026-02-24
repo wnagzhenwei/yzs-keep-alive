@@ -1,0 +1,82 @@
+{
+  "timestamp": "2026-01-27T10:00:28.931Z",
+  "summary": {
+    "total": 11,
+    "passed": 6,
+    "failed": 5,
+    "successRate": 54.54545454545454
+  },
+  "details": [
+    {
+      "name": "文件检查 index.html",
+      "passed": true,
+      "message": "文件存在",
+      "timestamp": "2026-01-27T10:00:18.915Z"
+    },
+    {
+      "name": "文件检查 assets/index-*.js",
+      "passed": false,
+      "message": "未找到匹配文件: assets/index-*.js",
+      "timestamp": "2026-01-27T10:00:18.916Z"
+    },
+    {
+      "name": "文件检查 assets/index-*.css",
+      "passed": false,
+      "message": "未找到匹配文件: assets/index-*.css",
+      "timestamp": "2026-01-27T10:00:18.916Z"
+    },
+    {
+      "name": "应用构建",
+      "passed": false,
+      "message": "部分构建文件缺失",
+      "timestamp": "2026-01-27T10:00:18.916Z"
+    },
+    {
+      "name": "ES模块输出",
+      "passed": true,
+      "message": "ES模块文件存在",
+      "timestamp": "2026-01-27T10:00:18.917Z"
+    },
+    {
+      "name": "UMD模块输出",
+      "passed": true,
+      "message": "UMD模块文件存在",
+      "timestamp": "2026-01-27T10:00:18.917Z"
+    },
+    {
+      "name": "库构建验证",
+      "passed": true,
+      "message": "库构建成功",
+      "timestamp": "2026-01-27T10:00:18.917Z"
+    },
+    {
+      "name": "单元测试文件检查",
+      "passed": true,
+      "message": "找到 3 个测试文件",
+      "timestamp": "2026-01-27T10:00:18.917Z"
+    },
+    {
+      "name": "单元测试准备",
+      "passed": true,
+      "message": "测试文件检查完成",
+      "timestamp": "2026-01-27T10:00:18.917Z"
+    },
+    {
+      "name": "服务器启动",
+      "passed": false,
+      "message": "服务器启动超时",
+      "timestamp": "2026-01-27T10:00:28.930Z"
+    },
+    {
+      "name": "服务器响应测试",
+      "passed": false,
+      "message": "前置测试失败，跳过此测试",
+      "timestamp": "2026-01-27T10:00:28.931Z"
+    }
+  ],
+  "recommendations": [
+    "需要测试: HTML结构验证",
+    "需要测试: 资源文件检查",
+    "需要测试: 单元测试验证"
+  ]
+}

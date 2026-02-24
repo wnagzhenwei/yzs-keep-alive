@@ -1,0 +1,62 @@
+{
+  "name": "yzs-keep-alive-v2",
+  "version": "0.1.0",
+  "description": "A custom KeepAlive component for Vue 2 that doesn't depend on Vue's built-in KeepAlive",
+  "main": "dist/yzs-keep-alive-v2.umd.js",
+  "module": "dist/yzs-keep-alive-v2.es.js",
+  "types": "src/index.d.ts",
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "vite --open",
+    "build": "vite build",
+    "preview": "vite preview",
+    "prepublishOnly": "npm run build",
+    "test": "node test/utils.test.js && node test/cache-manager.test.js",
+    "test:utils": "node test/utils.test.js",
+    "test:cache": "node test/cache-manager.test.js"
+  },
+  "keywords": [
+    "vue2",
+    "vue",
+    "keepalive",
+    "keep-alive",
+    "component",
+    "cache",
+    "state-preservation",
+    "lru",
+    "lifecycle",
+    "abstract-component"
+  ],
+  "author": {
+    "name": "hnwangzhenwei"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hnwangzhenwei/yzs-keep-alive.git",
+    "directory": "yzs-keep-alive-v2"
+  },
+  "homepage": "https://github.com/hnwangzhenwei/yzs-keep-alive#readme",
+  "bugs": {
+    "url": "https://github.com/hnwangzhenwei/yzs-keep-alive/issues"
+  },
+  "peerDependencies": {
+    "vue": "^2.6.0 || ^2.7.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue2": "^2.3.1",
+    "typescript": "^5.0.0",
+    "vite": "^7.3.1",
+    "vue": "^2.7.16",
+    "vue-template-compiler": "^0.1.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

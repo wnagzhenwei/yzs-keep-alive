@@ -1,0 +1,42 @@
+# Dependencies
+node_modules
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Development files
+*.log
+*.local
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Test files
+test
+test-*.html
+example.html
+
+# Build artifacts (only include dist)
+dist/*.map
+
+# Documentation files (internal)
+DEVELOPMENT.md
+IMPLEMENTATION_SUMMARY.md
+
+# Git
+.git
+.gitignore
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+
+# Misc
+.DS_Store
+Thumbs.db
+
+# npm config (should not be published)
+.npmrc
