@@ -15,7 +15,7 @@
     </div>
 
     <div class="test-area">
-      <YzsKeepAliveEnhanced
+      <YzsKeepAlive
         ref="keepAliveRef"
         :include="['ComponentA', 'ComponentB']"
         :exclude="['ComponentC']"
@@ -24,7 +24,7 @@
         @deactivated="handleDeactivated"
       >
         <component :is="components[currentComponent]" :key="currentComponent" />
-      </YzsKeepAliveEnhanced>
+      </YzsKeepAlive>
     </div>
 
     <div class="logs">
@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { ref, computed, markRaw, onMounted } from 'vue'
-import { YzsKeepAliveEnhanced } from 'yzs-keep-alive-v3'
+import { YzsKeepAlive } from 'yzs-keep-alive-v3'
 import ComponentA from './components/ComponentA.vue'
 import ComponentB from './components/ComponentB.vue'
 import ComponentC from './components/ComponentC.vue'
@@ -54,7 +54,7 @@ const components = {
 }
 
 // KeepAlive ref
-const keepAliveRef = ref<InstanceType<typeof YzsKeepAliveEnhanced>>()
+const keepAliveRef = ref<InstanceType<typeof YzsKeepAlive>>()
 
 // Logs
 const logs = ref<string[]>([])

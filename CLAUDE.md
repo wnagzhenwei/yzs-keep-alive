@@ -4,173 +4,81 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This repository contains `yzs-keep-alive-v3`, a custom Vue 3 KeepAlive component library that replicates Vue's built-in KeepAlive functionality without depending on it.
+This repository contains `yzs-keep-alive`, a custom Vue KeepAlive component library with two versions:
+- **`yzs-keep-alive-v3/`** — Vue 3 TypeScript library (main development focus)
+- **`yzs-keep-alive-v2/`** — Vue 2 JavaScript library (published to npm, stable)
 
-## Project Structure
+Two test applications exist: `test-app/` (Vue 3) and `test-vue2-app/` (Vue 2).
 
-The repository is organized into two main parts:
-- **`yzs-keep-alive-v3/`** - Main library project (Vue 3 component library)
-- **`test-app/`** - Vue 3 test application for manual testing
+This is **not** an npm workspace — each project has its own `package.json` and dependencies. Package manager is **pnpm**.
 
-### Key Directories (yzs-keep-alive-v3/)
-- `src/components/` - Vue component implementations (contains multiple variant versions with `.old`, `.old2`, `.stack` suffixes - focus on `YzsKeepAlive.vue` and `YzsKeepAliveEnhanced.vue`)
-- `src/core/` - Core caching, lifecycle, and utility modules
-- `src/composables/` - Composition API hooks
-- `src/types/` - TypeScript type definitions and Vue internal API extensions
-- `test/` - Unit tests (run against built UMD module)
-- `dist/` - Built output (ES and UMD formats with TypeScript declarations)
+## Development Commands
 
-## Library: yzs-keep-alive-v3
-
-A custom KeepAlive implementation for Vue 3 with the following features:
-- Component instance caching and state preservation
-- onActivated/onDeactivated lifecycle hooks
-- Include/Exclude pattern matching
-- Max cache limit with LRU eviction policy
-- No dependency on Vue's built-in KeepAlive
-- Full TypeScript support
-
-### Key Architecture
-
-The library has two main implementations:
-
-1. **YzsKeepAlive.vue** (Main export) - Uses Vue internal renderer API
-   - Direct integration with Vue's renderer via `sharedContext.renderer`
-   - Uses Vue's internal `move`, `patch`, `_unmount` functions
-   - Implements `activate`/`deactivate` callbacks for renderer
-   - **Dependency**: Relies on Vue internal APIs
-
-2. **YzsKeepAliveEnhanced.vue** - Alternative implementation with custom caching system
-   - Custom LRU cache manager
-   - Manual DOM management with hidden containers
-   - Instance state serialization/deserialization
-   - **Dependency**: Self-contained implementation
-
-### Core Modules
-
-- `src/core/cache-manager.ts` - LRU (Least Recently Used) cache implementation with eviction policy (used by Enhanced version)
-- `src/core/lifecycle-manager.ts` - Manages `onActivated`/`onDeactivated` lifecycle hooks (used by Enhanced version)
-- `src/core/shape-flags.ts` - Constants for Vue internal shape flags
-- `src/composables/useKeepAlive.ts` - Composition API hooks (`useKeepAlive`, `useKeepAliveState`, `useShouldCache`)
-- `src/types/` - TypeScript type definitions
-- `src/types/vue-internal.d.ts` - Vue internal API type extensions
-
-### API Surface
-
-#### Props
-- `include`: Only cache components matching these patterns (string, RegExp, or array)
-- `exclude`: Don't cache components matching these patterns (string, RegExp, or array)
-- `max`: Maximum number of component instances to cache (default: 10)
-
-#### Methods
-- `clearCache()`: Clear all cached components
-- `pruneCache(filter)`: Remove cached components matching filter function
-- `getCachedKeys()`: Get all cache keys
-- `getCacheSize()`: Get current cache size
-
-#### Events
-- `activated`: Emitted when a component is activated
-- `deactivated`: Emitted when a component is deactivated
-
-#### Composables
-- `useKeepAlive()`: Provides `onActivated` and `onDeactivated` hooks
-- `useKeepAliveState()`: Provides `isActive` reactive state
-- `useShouldCache()`: Utility to check if a component should be cached
-
-### Development Commands (in yzs-keep-alive-v3 directory)
-
-```bash
-npm run build          # Build the library (ES + UMD formats)
-npm run type-check     # TypeScript type checking
-npm run dev            # Development server (for testing)
-npm run preview        # Preview built output
-npm run build:types    # Build TypeScript declarations (runs vue-tsc)
-```
-
-### Dependencies
-
-#### Peer Dependencies
-- `vue`: `^3.0.0`
-
-#### Dev Dependencies
-- `@vitejs/plugin-vue`: Vue plugin for Vite
-- `@vue/compiler-sfc`: Vue SFC compiler
-- `@vue/shared`: Vue shared utilities
-- `typescript`: TypeScript compiler
-- `vite`: Build tool
-- `vite-plugin-dts`: TypeScript declaration generation
-- `vue`: `^3.4.0`
-- `vue-tsc`: TypeScript checking for Vue
-
-### Testing
-
-Unit tests are located in `test/` directory and use the built UMD module:
+### Library (yzs-keep-alive-v3/)
 ```bash
 cd yzs-keep-alive-v3
+pnpm run build          # Build library (ES + UMD) — must run before testing
+pnpm run type-check     # TypeScript type checking (vue-tsc)
+pnpm run build:types    # Build .d.ts declarations
+pnpm run dev            # Dev server
+pnpm run preview        # Preview built output
+```
+
+### Run a single test (must build first)
+```bash
+cd yzs-keep-alive-v3
+pnpm run build
 node test/cache-manager.test.js
 node test/lifecycle-manager.test.js
 node test/utils.test.js
 node test/state-cache.test.js
 ```
 
-**Important**: Tests must be run from the `yzs-keep-alive-v3/` directory and require the library to be built first (`npm run build`).
-
-## Test Application
-
-A Vue 3 application for testing the yzs-keep-alive-v3 library functionality.
-
-### Development Commands (in test-app directory)
+### Test application (Vue 3)
 ```bash
 cd test-app
-npm run dev    # Start development server (typically on port 5173)
-npm run build  # Build for production
-npm run preview # Preview built app
+pnpm run dev            # Dev server (port 5173)
 ```
 
-### Local Linking
+## Architecture
 
-The test app uses the local library via `file:../yzskeepalive` dependency in package.json. When developing:
-1. Make changes in `yzs-keep-alive-v3/`
-2. Run `npm run build` in `yzs-keep-alive-v3/`
-3. Restart the test app dev server to see changes
+### How the KeepAlive works (both v3 components)
 
-## Build Configuration
+Both `YzsKeepAlive.vue` and `YzsKeepAliveEnhanced.vue` are **functionally identical** — they both use Vue's internal renderer API:
 
-- **Build Tool**: Vite configured for library mode
-- **Output Formats**: ES module (`dist/yzs-keep-alive-v3.es.js`) and UMD (`dist/yzs-keep-alive-v3.umd.js`)
-- **External Dependencies**: `vue` and `@vue/shared` are externalized
-- **TypeScript**: Strict mode enabled with declaration generation via `vite-plugin-dts`
-- **Entry Point**: `src/index.ts`
-- **Vue Shim**: `.vue` file type declarations in `src/vue-shim.d.ts`
+1. Access Vue's internal renderer via `instance.ctx.renderer` (gets `patch`, `move`, `_unmount`, `createElement`)
+2. Create a hidden `<div>` storage container for deactivated components
+3. On **deactivate**: move vnode to hidden container, trigger `deactivated` hooks (`instance.da`)
+4. On **activate**: move vnode back to visible container, trigger `activated` hooks (`instance.a`)
+5. Cache stored in `Map<string, VNode>`, LRU tracking via `Set<string>`
+6. Uses `Promise.resolve().then()` as a simplified `queuePostRenderEffect` scheduler
 
-## Development Workflow
+The only difference: `YzsKeepAliveEnhanced.vue` defines its own local `ShapeFlags` enum instead of importing from `core/shape-flags.ts`.
 
-1. **Library Development**: Work in `yzs-keep-alive-v3/` directory
-2. **Building**: Run `npm run build` to build the library after making changes
-3. **Unit Testing**: Run tests from `yzs-keep-alive-v3/` directory
-4. **Manual Testing**: Use the test app in `test-app/` directory
-5. **Local Linking**: Test app uses `file:../yzskeepalive` - rebuild library after changes
+### Core modules actually used by the main components
 
-## Important Notes
+Only these `src/core/` modules are imported by `YzsKeepAlive.vue` and `YzsKeepAliveEnhanced.vue`:
+- `shape-flags.ts` — Vue internal shape flag constants
+- `utils.ts` — `getComponentName()`, `matches()` for include/exclude pattern matching
 
-1. **Vue Internal API Usage**: The main YzsKeepAlive.vue uses Vue's internal renderer API (`sharedContext.renderer`, `move`, `patch`, etc.). This is a dependency on Vue's internal implementation and may break across Vue versions.
+The following modules exist in `src/core/` but are **not wired into** the main components (exported for potential future use or standalone use):
+- `cache-manager.ts` — Standalone LRU cache (Map-based)
+- `lifecycle-manager.ts` — Singleton lifecycle hook registry
+- `component-wrapper.ts` — Component switching with caching wrapper
+- `dom-manager.ts` — DOM container show/hide, scroll position, media pause/resume
+- `instance-manager.ts` — Instance state save/restore
+- `stack-core.ts`, `history-stack.ts`, `stack-utils.ts`, `hacks.ts` — Router-integrated navigation stack (planned feature, not connected)
 
-2. **Two Implementations**: The repository contains both the Vue internal API version (main export) and the Enhanced version with custom caching.
+### Build & entry point
 
-3. **Type Declarations**: Custom type declarations are needed for Vue internal APIs in `src/types/vue-internal.d.ts`.
+- Entry: `yzs-keep-alive-v3/src/index.ts`
+- Output: `dist/yzs-keep-alive-v3.es.js` (ESM) + `dist/yzs-keep-alive-v3.umd.js` (UMD)
+- Type declarations: `dist/types/` via `vite-plugin-dts`
+- `vue` and `@vue/shared` are externalized (not bundled)
 
-4. **Testing Approach**: Unit tests run against the built UMD module (`dist/yzs-keep-alive-v3.umd.js`), not the source code directly. Always build before testing.
+## Critical Details
 
-5. **Component Variants**: The `src/components/` directory contains many `.old`, `.old2`, `.stack` files which are historical implementations. Focus on `YzsKeepAlive.vue` (main) and `YzsKeepAliveEnhanced.vue` (alternative).
-
-6. **Package Manager**: Uses pnpm (evidenced by `pnpm-lock.yaml`).
-
-## Exports
-
-The library exports the following from `src/index.ts`:
-- `YzsKeepAlive` - Main component (default)
-- `YzsKeepAliveEnhanced` - Alternative implementation
-- `useKeepAlive`, `useKeepAliveState`, `useShouldCache` - Composables
-- `useKeepAliveLifecycle`, `getLifecycleManager`, `resetLifecycleManager` - Lifecycle utilities
-- `createCacheManager` - Cache manager factory
-- `ShapeFlags` - Vue shape flag constants
+- **Tests run against the UMD build**, not source code. Always `pnpm run build` before running tests.
+- **Vue internal API dependency**: Both components access `instance.ctx.renderer` — this relies on Vue internals and may break across Vue minor versions. Type augmentations are in `src/types/vue-internal.d.ts`.
+- **Historical variants**: `src/components/` contains `.old`, `.old2`, `.stack`, `.stack-backup` files — these are dead code, do not modify.
+- **test-app linking**: The test app references `"yzs-keep-alive-v3": "file:../yzskeepalive"` — ensure this path resolves correctly when linking locally.
